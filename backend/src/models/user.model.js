@@ -5,7 +5,6 @@ const userSchema = new Schema(
     {
         username: {
             type: String,
-            required: true,
             unique: true,
             trim: true,
             index: true
@@ -24,20 +23,24 @@ const userSchema = new Schema(
             index: true
         },
         Department: {
-            type: String,
-            required: true
+            type: String
         },
         levelORyear: {
-            type: String,
-            required: true
+            type: String
         },
         Organization: {
-            type: String,
-            required: true
+            type: String
         },
         profilePic: {
             type: String
-        }
+        },
+        refreshToken: {
+            type: String
+        },
+        FullyRegistered: {
+            type: String,
+            default: false
+        } 
     },
     { timestamps: true }
 )
