@@ -23,13 +23,20 @@ const userSchema = new Schema(
             trim: true,
             index: true
         },
-        branch: {
+        Department: {
             type: String,
             required: true
         },
-        level: {
-            type: Number,
+        levelORyear: {
+            type: String,
             required: true
+        },
+        Organization: {
+            type: String,
+            required: true
+        },
+        profilePic: {
+            type: String
         }
     },
     { timestamps: true }
@@ -51,8 +58,7 @@ UserSchema.methods.generateAccessToken = function () {
             username: this.username,
             email: this.email,
             fullName: this.fullName,
-            branch: this.branch,
-            level: this.level
+            Organization: this.Organization
         }, process.env.JWT_AT_SECRET, {
         expiresIn: process.env.JWT_AT_EXPIRES_IN
     })
