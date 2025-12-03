@@ -57,6 +57,37 @@ const googleAuth = asyncHandler(async (req, res) => {
         .json(new ApiResponse(200, user, "GoogleAuth Successful"))
 })
 
+const registerUser = asyncHandler(async (req, res) => {
+    const {username, levelORyear, Department, Organization} = req.body
+    if (!username || !levelORyear || !Department || !Organization) {
+        throw new ApiError(400, "All fields are required")
+    }
+    const existingUser = await User.findOne({$or: [{ username }, { email }]})
+    if (existingUser) {
+        throw new ApiError(400, "Username or email already exists")
+    }
+    const user = await User.findOneAndUpdate({email}, 
+        {
+           $set: {
+            username,
+            levelORyear,
+            Department,
+            Organization,
+            FullyRegistered: true
+           }
+        },
+        {new: true}
+    )
+    if (!user) {
+        throw new ApiError(400, "Error while registering user")
+    }
+    
+    return res
+        .status(200)
+        .json(new ApiResponse(200, user, "User Registered Successfully"))
+})
+
 export {
-    googleAuth
+    googleAuth,
+    registerUser
 }
