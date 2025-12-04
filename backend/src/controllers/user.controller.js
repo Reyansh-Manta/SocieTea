@@ -87,7 +87,21 @@ const registerUser = asyncHandler(async (req, res) => {
         .json(new ApiResponse(200, user, "User Registered Successfully"))
 })
 
+const logoutUser = asyncHandler(async(req,res)=>{
+    const options = {
+        httpOnly: true,
+        secure: true,
+        sameSite: "none"
+    }
+    return res
+        .status(200)
+        .clearCookie("refreshToken", options)
+        .clearCookie("accessToken", options)
+        .json(new ApiResponse(200, {}, "User Logged Out Successfully"))
+})
+
 export {
     googleAuth,
-    registerUser
+    registerUser,
+    logoutUser
 }
