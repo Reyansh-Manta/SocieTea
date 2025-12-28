@@ -1,7 +1,0 @@
-node.js
-express.js
-nodemon
-cookie-parser
-jsonwebtoken
-mongoose
-google-auth-library

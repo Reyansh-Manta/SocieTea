@@ -19,4 +19,8 @@ app.get("/", (req, res) => {
   res.send("Backend is live ✅");
 });
 
+import userRouter from "./routes/user.routes.js"
+
+app.use("/api/v1/user", userRouter)
+
 export {app}

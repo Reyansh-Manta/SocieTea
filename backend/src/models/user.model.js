@@ -45,7 +45,7 @@ const userSchema = new Schema(
     { timestamps: true }
 )
 
-UserSchema.methods.generateRefreshToken = function () {
+userSchema.methods.generateRefreshToken = function () {
     return jwt.sign(
         {
             _id: this._id
@@ -54,7 +54,7 @@ UserSchema.methods.generateRefreshToken = function () {
     })
 }
 
-UserSchema.methods.generateAccessToken = function () {
+userSchema.methods.generateAccessToken = function () {
     return jwt.sign(
         {
             _id: this._id,
@@ -64,7 +64,7 @@ UserSchema.methods.generateAccessToken = function () {
             Organization: this.Organization
         }, process.env.JWT_AT_SECRET, {
         expiresIn: process.env.JWT_AT_EXPIRES_IN
-    })
+    })  
 }
 
 export const User = mongoose.model("User", userSchema);
