@@ -2,6 +2,7 @@ import { User } from "../models/user.model.js"
 import { ApiError } from "./ApiError.js"
 
 const generateTokens = async(userId) => {
+    console.log(userId);
     try {
         const user = await User.findById(userId)
         const refreshToken = user.generateRefreshToken()

@@ -21,7 +21,7 @@ const googleAuth = asyncHandler(async (req, res) => {
     const email = payload.email;
     const fullName = payload.name;
     const profilePic = payload.picture;
-    const emailVerified = payload.emailVerified
+    const emailVerified = payload.email_verified
 
     if (!emailVerified) {
         throw new ApiError(401, "Email not verified via googleAuth")
@@ -41,6 +41,7 @@ const googleAuth = asyncHandler(async (req, res) => {
             profilePic: profilePic || ""
         })
     }
+console.log(user._id);
 
     const {refreshToken, accessToken} = generateTokens(user._id)
 
