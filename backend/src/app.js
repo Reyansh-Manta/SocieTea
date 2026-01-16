@@ -20,7 +20,9 @@ app.get("/", (req, res) => {
 });
 
 import userRouter from "./routes/user.routes.js"
+import collegeRouter from "./routes/college.routes.js"
 
 app.use("/api/v1/user", userRouter)
+app.use("/api/v1/college", collegeRouter)
 
 export {app}

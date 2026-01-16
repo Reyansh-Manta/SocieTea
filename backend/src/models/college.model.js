@@ -12,10 +12,11 @@ const collegeSchema = new Schema(
         },
         emailFormat: {
             type: String,
-            required: true,
+            // required: true,
             unique: true,
             lowercase: true,
-            trim: true
+            trim: true,
+            sparse: true
         },
         profilePic: {
             type: String

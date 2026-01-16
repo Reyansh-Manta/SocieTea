@@ -1,8 +1,11 @@
 'use client';
 
 import { useEffect } from 'react';
+import { useRouter } from 'next/navigation';
 
 export default function GoogleLoginButton() {
+
+  const router = useRouter()
 
   async function handleCredentialResponse(response: any) {
     const googleIdToken = response.credential;
@@ -18,6 +21,20 @@ export default function GoogleLoginButton() {
 
     const data = await res.json();
     console.log(data);
+    
+    if(data.success == true){
+      if(data.data.FullyRegistered == true){
+        router.push('/');
+      }
+      else{
+        router.push('/register');
+      }
+    }
+    else{
+      console.log(data.error);
+      router.push('/googleAuth');
+    }
+
   }
 
   useEffect(() => {

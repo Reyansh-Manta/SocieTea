@@ -36,12 +36,13 @@ const googleAuth = asyncHandler(async (req, res) => {
     }
     else {
         user = await User.create({
+            username: email.split("@")[0],
             email,
             fullName,
             profilePic: profilePic || ""
         })
     }
-console.log(user._id);
+    // console.log(user._id);
 
     const {refreshToken, accessToken} = generateTokens(user._id)
 
