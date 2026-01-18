@@ -10,13 +10,9 @@ const collegeSchema = new Schema(
             trim: true,
             index: true
         },
-        emailFormat: {
-            type: String,
-            // required: true,
-            unique: true,
-            lowercase: true,
-            trim: true,
-            sparse: true
+        emailFormats: {
+            type: [String],
+            default: []
         },
         profilePic: {
             type: String

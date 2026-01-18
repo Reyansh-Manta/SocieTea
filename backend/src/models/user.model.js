@@ -40,7 +40,7 @@ const userSchema = new Schema(
         FullyRegistered: {
             type: String,
             default: false
-        } 
+        }
     },
     { timestamps: true }
 )
@@ -63,7 +63,7 @@ userSchema.methods.generateAccessToken = function () {
             fullName: this.fullName
         }, process.env.JWT_AT_SECRET, {
         expiresIn: process.env.JWT_AT_EXPIRES_IN
-    })  
+    })
 }
 
 export const User = mongoose.model("User", userSchema);
