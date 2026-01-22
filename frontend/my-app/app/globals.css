@@ -1,0 +1,70 @@
+@import "tailwindcss";
+@config "../tailwind.config.ts";
+
+:root {
+  --color-primary: #1D2D50;
+  --color-secondary: #FBFBFB;
+  --color-accent: #F3CA40;
+  --color-accent-coral: #FF6B6B;
+
+  /* Explicit Palette Names */
+  --color-oxford-blue: #1D2D50;
+  --color-charcoal: #131515;
+  --color-off-white: #FBFBFB;
+  --color-electric-saffron: #F3CA40;
+  --color-coral: #FF6B6B;
+
+  --font-sans: var(--font-inter);
+  --font-serif: var(--font-playfair);
+}
+
+/* Base styles */
+body {
+  background-color: var(--color-secondary);
+  color: var(--color-primary);
+  font-family: var(--font-sans);
+}
+
+h1,
+h2,
+h3,
+h4,
+h5,
+h6 {
+  font-family: var(--font-serif);
+  font-weight: 700;
+}
+
+:root {
+  background-color: #131515;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes slideUp {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.animate-fade-in {
+  animation: fadeIn 0.5s ease-out forwards;
+}
+
+.animate-slide-up {
+  animation: slideUp 0.5s ease-out forwards;
+}

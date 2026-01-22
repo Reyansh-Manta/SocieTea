@@ -1,0 +1,41 @@
+# Style Guide - Intellectual Vitality
+
+This document serves as the reference for the "Intellectual Vitality" design system implemented in the application.
+
+## 1. Color Palette
+
+The palette uses a serious, academic foundation with high-energy accents.
+
+| Color Name | Hex Code | CSS Variable | Tailwind Utility | Usage |
+| :--- | :--- | :--- | :--- | :--- |
+| **Oxford Blue** | `#1D2D50` | `--color-oxford-blue` | `bg-oxford-blue`, `text-oxford-blue` | Primary backgrounds, Headers, Professionalism. |
+| **Charcoal** | `#131515` | `--color-charcoal` | `bg-charcoal`, `text-charcoal` | Alternative dark background, High contrast text. |
+| **Off-White/Bone** | `#FBFBFB` | `--color-off-white` | `bg-off-white`, `text-off-white` | Cards, Sections, Backgrounds (easier on eyes than pure white). |
+| **Electric Saffron** | `#F3CA40` | `--color-electric-saffron` | `bg-electric-saffron`, `text-electric-saffron` | Accents, Buttons, Tags, Highlights. |
+| **Coral** | `#FF6B6B` | `--color-coral` | `bg-coral`, `text-coral` | "Register" buttons, High-priority calls to action. |
+
+### Semantic Mappings
+These generic text utilities map to the specific colors above:
+-   **Primary**: Mapped to **Oxford Blue**.
+-   **Secondary**: Mapped to **Off-White**.
+-   **Accent**: Mapped to **Electric Saffron**.
+
+## 2. Typography
+
+"Old School meets New School" - combining tradition with modern readability.
+
+### Headings: Serif
+-   **Font Family**: `Playfair Display`
+-   **CSS Variable**: `--font-serif`
+-   **Usage**: All headings (`h1` - `h6`). Mimics university letterheads and adds authority.
+
+### Body/UI: Sans-Serif
+-   **Font Family**: `Inter`
+-   **CSS Variable**: `--font-sans`
+-   **Usage**: Body text, UI elements, dates, times, speaker bios. Ensures high readability on mobile.
+
+## 3. Implementation Details
+
+-   **Configuration**: Defined in [tailwind.config.ts](file:///home/reyansh-manta/socieTea/SocieTea/frontend/my-app/tailwind.config.ts).
+-   **Variables**: Native CSS variables defined in [app/globals.css](file:///home/reyansh-manta/socieTea/SocieTea/frontend/my-app/app/globals.css) (`:root`).
+-   **Fonts**: Imported via `next/font/google` in [app/layout.tsx](file:///home/reyansh-manta/socieTea/SocieTea/frontend/my-app/app/layout.tsx).
