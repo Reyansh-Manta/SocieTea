@@ -7,7 +7,7 @@ import { googleClient } from "../utils/googleClient.js";
 import { College } from "../models/college.model.js";
 
 const googleAuth = asyncHandler(async (req, res) => {
-    const { id_token, emailFormat, organization } = req.body;
+    const { id_token, emailFormat, organization, organizationId } = req.body;
     if (!id_token) {
         throw new ApiError(401, "ID token is required");
     }
@@ -53,6 +53,7 @@ const googleAuth = asyncHandler(async (req, res) => {
             // Update organization if not set
             if (!user.Organization) {
                 user.Organization = organization;
+                if (organizationId) user.OrganizationId = organizationId;
                 await user.save();
             }
         } else {
@@ -61,7 +62,8 @@ const googleAuth = asyncHandler(async (req, res) => {
                 email,
                 fullName,
                 profilePic: profilePic || "",
-                Organization: organization
+                Organization: organization,
+                OrganizationId: organizationId
             })
         }
     } else {
@@ -79,10 +81,16 @@ const googleAuth = asyncHandler(async (req, res) => {
     }
 
     if (user && user.Organization) {
-        await College.findOneAndUpdate(
+        const college = await College.findOneAndUpdate(
             { name: user.Organization },
-            { $addToSet: { members: user._id } }
+            { $addToSet: { members: user._id } },
+            { new: true }
         );
+
+        if (college && !user.OrganizationId) {
+            user.OrganizationId = college._id;
+            await user.save();
+        }
     }
 
     // console.log(user._id);

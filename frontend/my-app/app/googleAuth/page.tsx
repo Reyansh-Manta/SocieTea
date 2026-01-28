@@ -14,6 +14,7 @@ export default function GoogleLoginButton() {
     const googleIdToken = response.credential;
     const emailFormat = localStorage.getItem('selectedEmailFormat');
     const organization = localStorage.getItem('selectedOrganization');
+    const organizationId = localStorage.getItem('selectedOrganizationId');
 
     try {
       const res = await fetch(
@@ -25,7 +26,8 @@ export default function GoogleLoginButton() {
           body: JSON.stringify({
             id_token: googleIdToken,
             emailFormat: emailFormat,
-            organization: organization
+            organization: organization,
+            organizationId: organizationId
           }),
         }
       );

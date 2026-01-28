@@ -40,7 +40,7 @@ export default function Discover() {
                         headers: {
                             "Content-Type": "application/json"
                         },
-                        body: JSON.stringify({ college_nameid: data.Organization })
+                        body: JSON.stringify({ college_nameid: data.OrganizationID })
                     });
                     const result = await response.json();
                     if (response.ok) {

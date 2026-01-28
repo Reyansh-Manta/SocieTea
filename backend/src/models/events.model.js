@@ -23,6 +23,14 @@ const eventSchema = new Schema(
             of: mongoose.Schema.Types.ObjectId,
             ref: "Org"
         },
+        startDate: {
+            type: Date,
+            required: true
+        },
+        endDate: {
+            type: Date,
+            required: true
+        },
         mode: {
             type: String,
             enum: ["Online", "Offline"],
@@ -30,11 +38,6 @@ const eventSchema = new Schema(
         },
         location: {
             type: String
-        },
-        members: {
-            type: Array,
-            of: mongoose.Schema.Types.ObjectId,
-            ref: "User"
         },
         poster: {
             type: String

@@ -26,5 +26,7 @@ import orgRouter from "./routes/orgs.routes.js"
 app.use("/api/v1/user", userRouter)
 app.use("/api/v1/college", collegeRouter)
 app.use("/api/v1/orgs", orgRouter)
+import eventRouter from "./routes/events.routes.js"
+app.use("/api/v1/events", eventRouter)
 
 export { app }

@@ -31,6 +31,10 @@ const userSchema = new Schema(
         Organization: {
             type: String
         },
+        OrganizationId: {
+            type: mongoose.Schema.Types.ObjectId,
+            ref: "College"
+        },
         Societies: {
             type: Array,
             default: []

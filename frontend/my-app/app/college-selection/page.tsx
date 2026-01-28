@@ -266,6 +266,7 @@ export default function CollegeSelection() {
                                             console.log(`Selected format: ${format}`);
                                             localStorage.setItem('selectedEmailFormat', format);
                                             localStorage.setItem('selectedOrganization', selectedCollege.name);
+                                            localStorage.setItem('selectedOrganizationId', selectedCollege._id);
                                             setShowModal(false);
                                             router.push("/googleAuth");
                                         }}
