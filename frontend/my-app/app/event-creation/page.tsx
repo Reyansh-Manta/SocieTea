@@ -61,7 +61,7 @@ export default function EventCreationPage() {
                         const orgsRes = await fetch("http://localhost:9000/api/v1/college/get-college-orgs", {
                             method: "POST",
                             headers: { "Content-Type": "application/json" },
-                            body: JSON.stringify({ college_nameid: currentUser.Organization })
+                            body: JSON.stringify({ college_nameid: currentUser.OrganizationId })
                         })
                         const orgsResult = await orgsRes.json()
                         const allOrgs: Org[] = orgsResult.data || []

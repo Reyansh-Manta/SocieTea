@@ -22,11 +22,11 @@ app.get("/", (req, res) => {
 import userRouter from "./routes/user.routes.js"
 import collegeRouter from "./routes/college.routes.js"
 import orgRouter from "./routes/orgs.routes.js"
+import eventRouter from "./routes/events.routes.js"
 
 app.use("/api/v1/user", userRouter)
 app.use("/api/v1/college", collegeRouter)
 app.use("/api/v1/orgs", orgRouter)
-import eventRouter from "./routes/events.routes.js"
 app.use("/api/v1/events", eventRouter)
 
 export { app }

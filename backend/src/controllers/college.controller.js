@@ -110,19 +110,10 @@ const submitEmailFormat = asyncHandler(async (req, res) => {
 })
 
 const getCollegeOrgs = asyncHandler(async (req, res) => {
+    // console.log("codereachedhere");
     const { college_nameid } = req.body;
 
-    // Check if college_nameid is a valid ObjectId
-    const isObjectId = mongoose.Types.ObjectId.isValid(college_nameid);
-
-    let query;
-    if (isObjectId) {
-        query = { _id: college_nameid };
-    } else {
-        query = { name: college_nameid };
-    }
-
-    const college = await College.findOne(query).populate("orgs");
+    const college = await College.findById(college_nameid).populate("orgs");
 
     if (college) {
         return res.status(200).json(

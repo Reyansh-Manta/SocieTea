@@ -16,6 +16,7 @@ export default function Discover() {
                 credentials: "include"
             })
             const data = await response.json()
+            // console.log(data);
             if (response.ok) {
                 setLogin(true);
                 setData(data.data)
@@ -33,19 +34,21 @@ export default function Discover() {
 
     useEffect(() => {
         const fetchOrgs = async () => {
-            if (data && data.Organization) {
+            if (data && data.user.Organization) {
+                // console.log("here");
                 try {
                     const response = await fetch("http://localhost:9000/api/v1/college/get-college-orgs", {
                         method: "POST",
                         headers: {
                             "Content-Type": "application/json"
                         },
-                        body: JSON.stringify({ college_nameid: data.OrganizationID })
+                        body: JSON.stringify({ college_nameid: data.user.OrganizationId })
                     });
                     const result = await response.json();
                     if (response.ok) {
                         setOrgs(result.data || []);
                     }
+                    // console.log(result);
                 } catch (error) {
                     console.error("Failed to fetch orgs", error);
                 }
@@ -54,9 +57,10 @@ export default function Discover() {
 
         if (login && data) {
             fetchOrgs();
+            // console.log("hi");
         }
     }, [login, data]);
-    console.log(data);
+    // console.log(data);
 
     if (login) {
         return (
