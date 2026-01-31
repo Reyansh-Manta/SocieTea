@@ -13,6 +13,12 @@ const orgSchema = new Schema(
         profilePic: {
             type: String
         },
+        status: {
+            type: String,
+            enum: ["Official", "Unofficial"],
+            default: "Unofficial",
+            required: true
+        },
         college: {
             type: mongoose.Schema.Types.ObjectId,
             ref: "College"

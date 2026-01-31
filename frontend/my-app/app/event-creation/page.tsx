@@ -3,7 +3,7 @@
 import { useState, useEffect } from "react"
 import { useRouter } from "next/navigation"
 import Navbar from "../components/Navbar/page"
-import { Calendar, MapPin, Upload, Type, AlignLeft, Users } from "lucide-react"
+import { Calendar, MapPin, Upload, Type, AlignLeft, Users, Link } from "lucide-react"
 
 interface Org {
     _id: string;
@@ -26,10 +26,12 @@ export default function EventCreationPage() {
     // Form State
     const [formData, setFormData] = useState({
         name: "",
+        shortDescription: "",
         description: "",
         mode: "Offline",
         location: "",
         poster: "",
+        formLink: "",
         orgId: "",
         startDate: "",
         endDate: ""
@@ -186,6 +188,28 @@ export default function EventCreationPage() {
                             />
                         </div>
 
+                        {/* Short Description */}
+                        <div className="space-y-2">
+                            <label className="text-sm font-medium text-gray-300 flex items-center gap-2">
+                                <AlignLeft className="w-4 h-4 text-indigo-400" />
+                                Short Description
+                            </label>
+                            <textarea
+                                required
+                                value={formData.shortDescription}
+                                onChange={e => {
+                                    if (e.target.value.length <= 100) {
+                                        setFormData({ ...formData, shortDescription: e.target.value })
+                                    }
+                                }}
+                                className="w-full bg-[#131515] border border-white/10 rounded-xl px-4 py-3 h-20 focus:outline-none focus:border-indigo-500 transition-colors placeholder:text-gray-600 resize-none"
+                                placeholder="Brief summary (max 100 characters)"
+                            />
+                            <div className="text-right text-xs text-gray-500">
+                                {formData.shortDescription.length}/100
+                            </div>
+                        </div>
+
                         {/* Description */}
                         <div className="space-y-2">
                             <label className="text-sm font-medium text-gray-300 flex items-center gap-2">
@@ -306,6 +330,22 @@ export default function EventCreationPage() {
                                 placeholder="https://..."
                             />
                             <p className="text-xs text-gray-500">Provide a direct link to your event poster (optional)</p>
+                        </div>
+
+                        {/* External Form Link */}
+                        <div className="space-y-2">
+                            <label className="text-sm font-medium text-gray-300 flex items-center gap-2">
+                                <Link className="w-4 h-4 text-indigo-400" />
+                                External Form Link
+                            </label>
+                            <input
+                                type="url"
+                                value={formData.formLink}
+                                onChange={e => setFormData({ ...formData, formLink: e.target.value })}
+                                className="w-full bg-[#131515] border border-white/10 rounded-xl px-4 py-3 focus:outline-none focus:border-indigo-500 transition-colors placeholder:text-gray-600"
+                                placeholder="https://forms.google.com/..."
+                            />
+                            <p className="text-xs text-gray-500">Link to any registration form or additional info (optional)</p>
                         </div>
 
                         {/* Submit Button */}

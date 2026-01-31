@@ -6,11 +6,15 @@ import { College } from "../models/college.model.js";
 import { User } from "../models/user.model.js";
 
 const createOrg = asyncHandler(async (req, res) => {
-    const { name, Description, profilePic } = req.body;
+    const { name, Description, profilePic, status } = req.body;
     const user = req.user;
 
     if (!name) {
         throw new ApiError(400, "Organization name is required");
+    }
+
+    if (!status || !["Official", "Unofficial"].includes(status)) {
+        throw new ApiError(400, "Organization status must be either 'Official' or 'Unofficial'");
     }
 
     if (!Description) {
@@ -56,6 +60,7 @@ const createOrg = asyncHandler(async (req, res) => {
         name,
         Description: Description || "",
         profilePic: profilePic || "", // Optional
+        status,
         college: college._id,
         admin: [user._id],
         members: [user._id]

@@ -14,7 +14,8 @@ export default function OrgCreation() {
     const [formData, setFormData] = useState({
         name: "",
         Description: "",
-        profilePic: ""
+        profilePic: "",
+        status: "Unofficial"
     })
 
     const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
@@ -138,6 +139,50 @@ export default function OrgCreation() {
                             </div>
                         </div>
 
+
+
+                        {/* Status Field */}
+                        <div className="space-y-2">
+                            <label className="block text-sm font-medium text-gray-300 ml-1">
+                                Organization Type <span className="text-red-400">*</span>
+                            </label>
+                            <div className="grid grid-cols-2 gap-4">
+                                <button
+                                    type="button"
+                                    onClick={() => setFormData({ ...formData, status: "Unofficial" })}
+                                    className={`relative p-4 rounded-xl border transition-all text-left group ${formData.status === "Unofficial"
+                                        ? "bg-indigo-600/20 border-indigo-500/50"
+                                        : "bg-white/5 border-white/10 hover:bg-white/10"
+                                        }`}
+                                >
+                                    <div className="font-semibold text-white mb-1">Unofficial</div>
+                                    <div className="text-xs text-gray-400">Community led, open for everyone.</div>
+                                    {formData.status === "Unofficial" && (
+                                        <div className="absolute top-3 right-3 text-indigo-400">
+                                            <CheckCircle2 className="w-5 h-5" />
+                                        </div>
+                                    )}
+                                </button>
+
+                                <button
+                                    type="button"
+                                    onClick={() => setFormData({ ...formData, status: "Official" })}
+                                    className={`relative p-4 rounded-xl border transition-all text-left group ${formData.status === "Official"
+                                        ? "bg-purple-600/20 border-purple-500/50"
+                                        : "bg-white/5 border-white/10 hover:bg-white/10"
+                                        }`}
+                                >
+                                    <div className="font-semibold text-white mb-1">Official</div>
+                                    <div className="text-xs text-gray-400">College recognized, formal structure.</div>
+                                    {formData.status === "Official" && (
+                                        <div className="absolute top-3 right-3 text-purple-400">
+                                            <CheckCircle2 className="w-5 h-5" />
+                                        </div>
+                                    )}
+                                </button>
+                            </div>
+                        </div>
+
                         {/* Description Field */}
                         <div className="space-y-2">
                             <label htmlFor="Description" className="block text-sm font-medium text-gray-300 ml-1">
@@ -199,7 +244,7 @@ export default function OrgCreation() {
                         </div>
                     </form>
                 </div>
-            </main>
-        </div>
+            </main >
+        </div >
     )
 }

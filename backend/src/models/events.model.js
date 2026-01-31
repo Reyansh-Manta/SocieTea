@@ -13,6 +13,11 @@ const eventSchema = new Schema(
         description: {
             type: String
         },
+        shortDescription: {
+            type: String,
+            required: true,
+            maxlength: 100
+        },
         college: {
             type: Array,
             of: mongoose.Schema.Types.ObjectId,
@@ -40,6 +45,9 @@ const eventSchema = new Schema(
             type: String
         },
         poster: {
+            type: String
+        },
+        formLink: {
             type: String
         },
         RSVP: {

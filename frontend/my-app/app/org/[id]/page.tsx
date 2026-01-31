@@ -3,6 +3,7 @@
 import { useSearchParams, useParams } from "next/navigation"
 import Navbar from "../../components/Navbar/page"
 import { useState, useEffect } from "react"
+import { useAuth } from "../../context/AuthContext"
 import { Settings, Calendar, MapPin, Users, Heart, Share2, MoreVertical } from "lucide-react"
 
 interface User {
@@ -19,6 +20,7 @@ interface Org {
     description?: string;
     admin: string[]; // List of User IDs
     members?: string[];
+    status?: string;
 }
 
 interface Event {
@@ -30,6 +32,8 @@ interface Event {
     location: string;
     poster: string;
     description?: string;
+    shortDescription?: string;
+    RSVP: string[];
 }
 
 export default function OrgPage() {
@@ -40,35 +44,27 @@ export default function OrgPage() {
     const orgNameSlug = params?.id ? decodeURIComponent(params.id as string) : ""
     const dbId = searchParams.get("id")
 
-    const [user, setUser] = useState<User | null>(null)
+    const { user, loading: userLoading, rsvpEvents, toggleRsvpInState, syncRsvps } = useAuth()
     const [org, setOrg] = useState<Org | null>(null)
-    const [loading, setLoading] = useState(true)
+    const [localLoading, setLocalLoading] = useState(true)
     const [isMember, setIsMember] = useState(false)
     const [isAdmin, setIsAdmin] = useState(false)
 
     // Events State
     const [allEvents, setAllEvents] = useState<Event[]>([])
-    const [rsvpEvents, setRsvpEvents] = useState<string[]>([]) // use string IDs
 
     useEffect(() => {
         const loadDat = async () => {
+            if (userLoading) return; // Wait for user to load
+
             try {
-                // 1. Fetch User
-                const userRes = await fetch("http://localhost:9000/api/v1/user/getUser", {
-                    credentials: "include"
-                })
-                const userDataWrapper = await userRes.json()
-                const currentUser = userDataWrapper.data?.user
-
-                if (currentUser) {
-                    setUser(currentUser)
-
+                if (user) {
                     // 2. Fetch All Orgs for the User's College
-                    if (currentUser.Organization) {
+                    if (user.Organization) {
                         const orgsRes = await fetch("http://localhost:9000/api/v1/college/get-college-orgs", {
                             method: "POST",
                             headers: { "Content-Type": "application/json" },
-                            body: JSON.stringify({ college_nameid: currentUser.OrganizationId })
+                            body: JSON.stringify({ college_nameid: user.OrganizationId })
                         })
                         const orgsResult = await orgsRes.json()
                         const allOrgs: Org[] = orgsResult.data || []
@@ -80,12 +76,12 @@ export default function OrgPage() {
                             setOrg(foundOrg)
 
                             // Check Admin Status
-                            if (foundOrg.admin && foundOrg.admin.includes(currentUser._id)) {
+                            if (foundOrg.admin && foundOrg.admin.includes(user._id)) {
                                 setIsAdmin(true)
                             }
 
                             // Check Member Status
-                            if (foundOrg.members && foundOrg.members.includes(currentUser._id)) {
+                            if (foundOrg.members && foundOrg.members.includes(user._id)) {
                                 setIsMember(true)
                             }
 
@@ -97,7 +93,15 @@ export default function OrgPage() {
                             })
                             const eventsData = await eventsRes.json()
                             if (eventsRes.ok) {
-                                setAllEvents(eventsData.data)
+                                const events: Event[] = eventsData.data
+                                setAllEvents(events)
+
+                                // Sync RSVPs logic
+                                const rsvpedEvents = events
+                                    .filter(e => e.RSVP && e.RSVP.includes(user._id))
+                                    .map(e => e._id)
+
+                                syncRsvps(rsvpedEvents)
                             }
                         }
                     }
@@ -105,12 +109,12 @@ export default function OrgPage() {
             } catch (error) {
                 console.error("Error fetching data:", error)
             } finally {
-                setLoading(false)
+                setLocalLoading(false)
             }
         }
 
         loadDat()
-    }, [dbId, orgNameSlug])
+    }, [dbId, orgNameSlug, user, userLoading])
 
 
     const [activeTab, setActiveTab] = useState('Events')
@@ -134,10 +138,25 @@ export default function OrgPage() {
         }
     }
 
-    const handleRSVP = (eventId: string) => {
-        setRsvpEvents(prev =>
-            prev.includes(eventId) ? prev.filter(id => id !== eventId) : [...prev, eventId]
-        );
+    const handleRSVP = async (eventId: string) => {
+        try {
+            const res = await fetch("http://localhost:9000/api/v1/events/toggle-rsvp", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ eventId }),
+                credentials: "include"
+            });
+
+            if (res.ok) {
+                const data = await res.json()
+                const isNowRsvped = data.data.isRsvped
+
+                // Update global state
+                toggleRsvpInState(eventId, isNowRsvped);
+            }
+        } catch (error) {
+            console.error("Error toggling RSVP:", error)
+        }
     }
 
     // Helper to format date
@@ -153,7 +172,7 @@ export default function OrgPage() {
     const upcomingEvents = allEvents.filter(e => new Date(e.startDate) > now)
     const pastEvents = allEvents.filter(e => new Date(e.endDate) < now)
 
-    if (loading) return <div className="min-h-screen bg-[#131515] flex items-center justify-center text-white">Loading...</div>
+    if (userLoading || localLoading) return <div className="min-h-screen bg-[#131515] flex items-center justify-center text-white">Loading...</div>
 
     return (
         <div className="min-h-screen bg-[#131515] text-white font-sans">
@@ -186,7 +205,17 @@ export default function OrgPage() {
                             </div>
 
                             <div className="mb-2">
-                                <h1 className="text-3xl md:text-4xl font-bold text-white">{org?.name || orgNameSlug}</h1>
+                                <div className="flex items-center gap-3">
+                                    <h1 className="text-3xl md:text-4xl font-bold text-white">{org?.name || orgNameSlug}</h1>
+                                    {org?.status && (
+                                        <span className={`px-2 py-0.5 text-xs font-semibold rounded-full border ${org.status === 'Official'
+                                            ? 'bg-purple-500/20 text-purple-300 border-purple-500/30'
+                                            : 'bg-indigo-500/20 text-indigo-300 border-indigo-500/30'
+                                            }`}>
+                                            {org.status}
+                                        </span>
+                                    )}
+                                </div>
                                 <p className="text-gray-400 text-sm mt-1">{org?.description || "Tech & Coding enthusiasts aiming to innovate."}</p>
                             </div>
                         </div>
@@ -249,7 +278,7 @@ export default function OrgPage() {
                                     </section>
                                 )}
 
-                                {/* Upcoming Events */}
+                                {/* Upcoming EvTech & Coding enthusiasts aiming to innovate.ents */}
                                 <section>
                                     <h2 className="text-xl font-bold mb-4 flex items-center gap-2">
                                         Upcoming Events
@@ -330,6 +359,7 @@ export default function OrgPage() {
 
 function EventCard({ event, handleRSVP, rsvpEvents, orgName, isPast = false }: { event: Event, handleRSVP: any, rsvpEvents: string[], orgName?: string, isPast?: boolean }) {
     const isRsvped = rsvpEvents.includes(event._id)
+    const [imgError, setImgError] = useState(false)
 
     // Helper to format date
     const formatDate = (dateStr: string) => {
@@ -340,12 +370,17 @@ function EventCard({ event, handleRSVP, rsvpEvents, orgName, isPast = false }: {
 
     return (
         <div className="bg-[#1D1F21] rounded-2xl p-4 border border-white/5 hover:border-white/10 transition-all group flex flex-col h-full">
-            <div className="h-32 rounded-xl bg-gray-800 mb-4 overflow-hidden relative">
-                {event.poster ? (
-                    <img src={event.poster} alt={event.name} className="w-full h-full object-cover" />
+            <div className="aspect-[2/3] w-full rounded-xl bg-gray-800 mb-4 overflow-hidden relative">
+                {event.poster && !imgError ? (
+                    <img
+                        src={event.poster}
+                        alt={event.name}
+                        className="w-full h-full object-cover"
+                        onError={() => setImgError(true)}
+                    />
                 ) : (
-                    <div className="w-full h-full bg-gradient-to-br from-indigo-900 to-purple-900 flex items-center justify-center">
-                        <Calendar className="w-10 h-10 text-white/20" />
+                    <div className="w-full h-full bg-[#050505] flex items-center justify-center">
+                        <img src="/societea.png" alt="SocieTea Logo" className="w-3/4 h-auto opacity-50 transition-all duration-500 hover:scale-105" />
                     </div>
                 )}
                 <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent"></div>
@@ -354,6 +389,11 @@ function EventCard({ event, handleRSVP, rsvpEvents, orgName, isPast = false }: {
             <p className="text-gray-400 text-xs mb-3">Organized by {orgName}</p>
 
             <div className="space-y-2 text-sm text-gray-300 mb-4 flex-grow">
+                {/* Short Description */}
+                {event.shortDescription && (
+                    <p className="text-gray-400 text-xs line-clamp-2 mb-2">{event.shortDescription}</p>
+                )}
+
                 <div className="flex items-center gap-2">
                     <Calendar className="w-4 h-4 text-indigo-400" />
                     <span>{formatDate(event.startDate)}</span>
@@ -362,6 +402,10 @@ function EventCard({ event, handleRSVP, rsvpEvents, orgName, isPast = false }: {
                     <MapPin className="w-4 h-4 text-indigo-400" />
                     <span className="truncate">{event.location}</span>
                 </div>
+
+                <a href={`/event/${event._id}`} className="block text-indigo-400 text-xs hover:text-indigo-300 transition-colors mt-2">
+                    View Details &rarr;
+                </a>
             </div>
 
             {!isPast && (
