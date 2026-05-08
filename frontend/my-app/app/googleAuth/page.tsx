@@ -18,7 +18,7 @@ export default function GoogleLoginButton() {
 
     try {
       const res = await fetch(
-        `${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:9000'}/api/v1/user/googleAuth`,
+        `${process.env.NEXT_PUBLIC_API_URL || (typeof window !== 'undefined' ? `http://${window.location.hostname}:9000` : 'http://localhost:9000')}/api/v1/user/googleAuth`,
         {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },

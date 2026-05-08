@@ -53,7 +53,7 @@ export default function EventPage() {
         const loadData = async () => {
             try {
                 if (eventId) {
-                    const eventRes = await fetch(`${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:9000'}/api/v1/events/get-event/${eventId}`)
+                    const eventRes = await fetch(`${process.env.NEXT_PUBLIC_API_URL || (typeof window !== 'undefined' ? `http://${window.location.hostname}:9000` : 'http://localhost:9000')}/api/v1/events/get-event/${eventId}`)
                     if (eventRes.ok) {
                         const eventData = await eventRes.json()
                         const eventObj: Event = eventData.data
@@ -110,7 +110,7 @@ export default function EventPage() {
         if (!event || !user) return
 
         try {
-            const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:9000'}/api/v1/events/toggle-rsvp`, {
+            const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL || (typeof window !== 'undefined' ? `http://${window.location.hostname}:9000` : 'http://localhost:9000')}/api/v1/events/toggle-rsvp`, {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
                 body: JSON.stringify({ eventId: event._id }),

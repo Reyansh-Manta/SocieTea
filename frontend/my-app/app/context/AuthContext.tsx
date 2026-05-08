@@ -30,7 +30,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     const refreshUser = async () => {
         try {
             setLoading(true);
-            const userRes = await fetch(`${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:9000'}/api/v1/user/getUser`, {
+            const userRes = await fetch(`${process.env.NEXT_PUBLIC_API_URL || (typeof window !== 'undefined' ? `http://${window.location.hostname}:9000` : 'http://localhost:9000')}/api/v1/user/getUser`, {
                 credentials: "include"
             });
             if (userRes.ok) {

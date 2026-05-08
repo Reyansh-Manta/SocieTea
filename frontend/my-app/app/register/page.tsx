@@ -74,7 +74,7 @@ export default function Register() {
         setErrorMessage("")
 
         try {
-            const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:9000'}/api/v1/user/register`, {
+            const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL || (typeof window !== 'undefined' ? `http://${window.location.hostname}:9000` : 'http://localhost:9000')}/api/v1/user/register`, {
                 method: "POST",
                 headers: {
                     "Content-Type": "application/json",

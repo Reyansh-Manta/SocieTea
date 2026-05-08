@@ -11,7 +11,7 @@ export default function Discover() {
 
     async function checkLogin() {
         try {
-            const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:9000'}/api/v1/user/getUser`, {
+            const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL || (typeof window !== 'undefined' ? `http://${window.location.hostname}:9000` : 'http://localhost:9000')}/api/v1/user/getUser`, {
                 method: "GET",
                 credentials: "include"
             })
@@ -37,7 +37,7 @@ export default function Discover() {
             if (data && data.user.Organization) {
                 // console.log("here");
                 try {
-                    const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:9000'}/api/v1/college/get-college-orgs`, {
+                    const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL || (typeof window !== 'undefined' ? `http://${window.location.hostname}:9000` : 'http://localhost:9000')}/api/v1/college/get-college-orgs`, {
                         method: "POST",
                         headers: {
                             "Content-Type": "application/json"
