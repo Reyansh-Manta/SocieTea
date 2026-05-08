@@ -24,7 +24,7 @@ export default function CollegeSelection() {
     const fetchColleges = async (currentPage: number, search: string, shouldAppend: boolean) => {
         setLoading(true)
         try {
-            const response = await fetch(`http://localhost:9000/api/v1/college/get-colleges?search=${encodeURIComponent(search)}&page=${currentPage}&limit=${PAGE_SIZE}`)
+            const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:9000'}/api/v1/college/get-colleges?search=${encodeURIComponent(search)}&page=${currentPage}&limit=${PAGE_SIZE}`)
             const data = await response.json()
 
             if (data.success) {
@@ -85,7 +85,7 @@ export default function CollegeSelection() {
         // Simulate API call
         // await new Promise(resolve => setTimeout(resolve, 1000))
         try {
-            const response = await fetch("http://localhost:9000/api/v1/college/submit-email-format", {
+            const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:9000'}/api/v1/college/submit-email-format`, {
                 method: "POST",
                 headers: {
                     "Content-Type": "application/json",

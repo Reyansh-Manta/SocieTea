@@ -33,7 +33,7 @@ export default function OrgCreation() {
         setSuccess(false)
 
         try {
-            const response = await fetch("http://localhost:9000/api/v1/orgs/create", {
+            const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:9000'}/api/v1/orgs/create`, {
                 method: "POST",
                 headers: {
                     "Content-Type": "application/json",

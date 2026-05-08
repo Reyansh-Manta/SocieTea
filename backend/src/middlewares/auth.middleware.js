@@ -17,13 +17,9 @@ export const verifyJWT = asyncHandler(async (req, res, next) => {
             throw new ApiError(401, "User not found")
         }
         req.user = user
-        console.log(user);
 
         next()
     } catch (error) {
-
-        console.log(error);
-
         throw new ApiError(401, error.message || "Invalid token")
     }
 })

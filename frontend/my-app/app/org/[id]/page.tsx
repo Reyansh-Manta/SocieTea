@@ -61,7 +61,7 @@ export default function OrgPage() {
                 if (user) {
                     // 2. Fetch All Orgs for the User's College
                     if (user.Organization) {
-                        const orgsRes = await fetch("http://localhost:9000/api/v1/college/get-college-orgs", {
+                        const orgsRes = await fetch(`${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:9000'}/api/v1/college/get-college-orgs`, {
                             method: "POST",
                             headers: { "Content-Type": "application/json" },
                             body: JSON.stringify({ college_nameid: user.OrganizationId })
@@ -86,7 +86,7 @@ export default function OrgPage() {
                             }
 
                             // 4. Fetch Events for this Org
-                            const eventsRes = await fetch("http://localhost:9000/api/v1/events/get-org-events", {
+                            const eventsRes = await fetch(`${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:9000'}/api/v1/events/get-org-events`, {
                                 method: "POST",
                                 headers: { "Content-Type": "application/json" },
                                 body: JSON.stringify({ orgId: foundOrg._id })
@@ -123,7 +123,7 @@ export default function OrgPage() {
     const handleFollow = async () => {
         if (!org || !user) return;
         try {
-            const res = await fetch("http://localhost:9000/api/v1/orgs/toggle-membership", {
+            const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:9000'}/api/v1/orgs/toggle-membership`, {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
                 body: JSON.stringify({ orgId: org._id }),
@@ -140,7 +140,7 @@ export default function OrgPage() {
 
     const handleRSVP = async (eventId: string) => {
         try {
-            const res = await fetch("http://localhost:9000/api/v1/events/toggle-rsvp", {
+            const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:9000'}/api/v1/events/toggle-rsvp`, {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
                 body: JSON.stringify({ eventId }),

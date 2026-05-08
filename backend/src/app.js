@@ -29,4 +29,24 @@ app.use("/api/v1/college", collegeRouter)
 app.use("/api/v1/orgs", orgRouter)
 app.use("/api/v1/events", eventRouter)
 
+import { ApiError } from "./utils/ApiError.js"
+
+app.use((err, req, res, next) => {
+    if (err instanceof ApiError) {
+        return res.status(err.statusCode).json({
+            statusCode: err.statusCode,
+            message: err.message,
+            success: err.success,
+            errors: err.errors
+        });
+    }
+    
+    console.error(err);
+    return res.status(500).json({
+        statusCode: 500,
+        message: "Internal Server Error",
+        success: false
+    });
+});
+
 export { app }

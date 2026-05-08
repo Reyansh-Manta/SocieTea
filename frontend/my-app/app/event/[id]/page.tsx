@@ -4,7 +4,7 @@ import { useParams, useRouter } from "next/navigation"
 import { useState, useEffect } from "react"
 import { useAuth } from "../../context/AuthContext"
 import Navbar from "../../components/Navbar/page"
-import { Calendar, MapPin, Users, ArrowLeft, Share2, Heart, Clock, Ticket, Globe, Video, X } from "lucide-react"
+import { Calendar, MapPin, Users, ArrowLeft, Share2, Heart, Clock, Ticket, Globe, Video, X, Check } from "lucide-react"
 
 interface Org {
     _id: string;
@@ -44,6 +44,7 @@ export default function EventPage() {
     const [activeTab, setActiveTab] = useState("Details")
     const [imgError, setImgError] = useState(false)
     const [showFullPoster, setShowFullPoster] = useState(false)
+    const [showFormPopup, setShowFormPopup] = useState(false)
 
     // Derived state
     const isRsvped = event ? rsvpEvents.includes(event._id) : false
@@ -52,7 +53,7 @@ export default function EventPage() {
         const loadData = async () => {
             try {
                 if (eventId) {
-                    const eventRes = await fetch(`http://localhost:9000/api/v1/events/get-event/${eventId}`)
+                    const eventRes = await fetch(`${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:9000'}/api/v1/events/get-event/${eventId}`)
                     if (eventRes.ok) {
                         const eventData = await eventRes.json()
                         const eventObj: Event = eventData.data
@@ -89,8 +90,27 @@ export default function EventPage() {
         }
         if (!event) return
 
+        // If user is already RSVPed, just toggle off without popup
+        if (isRsvped) {
+            await confirmRSVP()
+            return
+        }
+
+        // If not RSVPed, check for form link
+        if (event.formLink) {
+            setShowFormPopup(true)
+            return
+        }
+
+        // If no form link, proceed normally
+        await confirmRSVP()
+    }
+
+    const confirmRSVP = async () => {
+        if (!event || !user) return
+
         try {
-            const res = await fetch("http://localhost:9000/api/v1/events/toggle-rsvp", {
+            const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:9000'}/api/v1/events/toggle-rsvp`, {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
                 body: JSON.stringify({ eventId: event._id }),
@@ -123,6 +143,9 @@ export default function EventPage() {
                     }
                     return { ...prev, RSVP: newRSVP }
                 })
+
+                // Close popup if open
+                setShowFormPopup(false)
             }
         } catch (error) {
             console.error("Error toggling RSVP:", error)
@@ -163,94 +186,149 @@ export default function EventPage() {
             <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
 
                 {/* Header Section */}
-                <div className="mb-8">
+                <div className="mb-12">
                     <button
                         onClick={() => router.back()}
-                        className="mb-4 flex items-center gap-2 text-gray-400 hover:text-white transition-colors text-sm font-medium"
+                        className="mb-6 flex items-center gap-2 text-white/60 hover:text-white transition-colors text-sm font-medium tracking-wide group"
                     >
-                        <ArrowLeft className="w-4 h-4" />
+                        <div className="p-1.5 rounded-full bg-white/5 border border-white/5 group-hover:bg-white/10 transition-colors">
+                            <ArrowLeft className="w-3 h-3" />
+                        </div>
                         Back to Events
                     </button>
 
-                    {/* New Vertical Poster Hero Section */}
-                    <div className="relative w-full rounded-3xl overflow-hidden bg-[#18181b] border border-white/5">
+                    {/* Hero Section Redesign */}
+                    <div className="relative w-full rounded-[2rem] overflow-hidden border border-white/10 shadow-2xl bg-[#18181b]/50 backdrop-blur-sm group select-none">
 
-                        {/* Ambient Background */}
-                        <div className="absolute inset-0">
-                            {event.poster && !imgError ? (
-                                <div className="w-full h-full relative">
-                                    <img
-                                        src={event.poster}
-                                        alt="Background"
-                                        className="w-full h-full object-cover blur-3xl opacity-30 scale-110"
-                                    />
-                                    <div className="absolute inset-0 bg-gradient-to-t from-[#09090b] via-[#09090b]/80 to-transparent"></div>
-                                </div>
-                            ) : (
-                                <div className="w-full h-full bg-gradient-to-br from-indigo-900/20 to-purple-900/20"></div>
+                        {/* Ambient Background Layer */}
+                        <div className="absolute inset-0 z-0 overflow-hidden">
+                            {event.poster && (
+                                <div
+                                    className="absolute inset-0 bg-cover bg-center opacity-40 blur-[80px] scale-125 saturate-150 transition-transform duration-[3s]"
+                                    style={{ backgroundImage: `url(${event.poster})` }}
+                                />
                             )}
+                            <div className="absolute inset-0 bg-gradient-to-t md:bg-gradient-to-r from-[#09090b] via-[#09090b]/80 to-[#09090b]/40 mix-blend-multiply" />
+                            <div className="absolute inset-0 bg-black/20" />
                         </div>
 
-                        {/* Content Container */}
-                        <div className="relative z-10 p-6 md:p-10 flex flex-col md:flex-row gap-8 items-end">
+                        <div className="relative z-10 flex flex-col md:flex-row p-6 md:p-10 lg:p-12 gap-8 md:gap-12 items-center">
 
-                            {/* Poster Image */}
-                            <div className="w-full md:w-80 shrink-0 mx-auto md:mx-0">
+                            {/* Portrait Poster Container */}
+                            <div className="w-full md:w-auto flex-shrink-0 flex justify-center md:justify-start">
                                 <div
-                                    className="aspect-[2/3] rounded-2xl overflow-hidden shadow-2xl border border-white/10 bg-[#242427] relative group cursor-pointer"
+                                    className="relative w-[280px] sm:w-[300px] md:w-[320px] aspect-[2/3] md:aspect-[3/4] rounded-2xl overflow-hidden shadow-2xl shadow-black/50 ring-1 ring-white/10 rotate-2 hover:rotate-0 transition-all duration-500 ease-[cubic-bezier(0.23,1,0.32,1)] group-hover:scale-[1.02] cursor-pointer"
                                     onClick={() => !imgError && setShowFullPoster(true)}
                                 >
                                     {event.poster && !imgError ? (
                                         <img
                                             src={event.poster}
                                             alt={event.name}
-                                            className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
+                                            className="object-cover w-full h-full"
                                             onError={() => setImgError(true)}
                                         />
                                     ) : (
                                         <div className="w-full h-full bg-[#18181b] flex items-center justify-center">
-                                            <img src="/societea.png" alt="SocieTea Logo" className="w-32 opacity-50" />
+                                            <div className="text-center p-4">
+                                                <img src="/societea.png" alt="SocieTea Logo" className="w-24 mx-auto opacity-30 mb-2" />
+                                                <span className="text-xs text-white/30 tracking-widest uppercase">No Poster</span>
+                                            </div>
                                         </div>
                                     )}
-
-                                    {/* Hover Hint */}
-                                    {!imgError && (
-                                        <div className="absolute inset-0 bg-black/40 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-300">
-                                            <p className="text-white font-medium text-sm flex items-center gap-2">
-                                                <span className="p-2 bg-white/10 rounded-full backdrop-blur-md">Click to expand</span>
-                                            </p>
-                                        </div>
-                                    )}
+                                    {/* Poster Shine Effect & Hint */}
+                                    <div className="absolute inset-0 bg-gradient-to-tr from-white/10 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
+                                    <div className="absolute inset-0 flex items-center justify-center opacity-0 hover:opacity-100 transition-opacity duration-300 bg-black/20 backdrop-blur-[2px]">
+                                        <span className="px-3 py-1.5 rounded-full bg-black/50 text-white text-xs font-medium border border-white/20 backdrop-blur-md">View Fullscreen</span>
+                                    </div>
                                 </div>
                             </div>
 
                             {/* Event Details */}
-                            <div className="flex-1 space-y-4 text-center md:text-left pb-4">
-                                <span className={`inline-flex items-center px-3 py-1 rounded-full text-xs font-semibold backdrop-blur-md border border-white/10 
-                                    ${event.mode === 'Online' ? 'bg-emerald-500/20 text-emerald-400' : 'bg-indigo-500/20 text-indigo-400'}`}>
-                                    {event.mode === 'Online' ? <Globe className="w-3 h-3 mr-1" /> : <MapPin className="w-3 h-3 mr-1" />}
-                                    {event.mode} Event
-                                </span>
+                            <div className="flex-grow space-y-6 w-full text-center md:text-left">
 
-                                <h1 className="text-4xl md:text-6xl font-black text-white leading-tight tracking-tight drop-shadow-lg">
+                                {/* Org Badge & Status */}
+                                <div className="flex flex-wrap items-center justify-center md:justify-start gap-3">
+                                    {organizer && (
+                                        <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-white/5 border border-white/10 backdrop-blur-md hover:bg-white/10 transition-colors cursor-pointer group/org" onClick={(e) => { e.stopPropagation(); router.push(`/org/${organizer._id}`); }}>
+                                            <img src={organizer.profilePic || "/api/placeholder/40/40"} alt="" className="w-5 h-5 rounded-full object-cover ring-1 ring-white/20" />
+                                            <span className="text-sm font-medium text-gray-200 group-hover/org:text-white transition-colors">{organizer.name}</span>
+                                        </div>
+                                    )}
+                                    <span className={`px-3 py-1.5 rounded-full border text-xs font-semibold uppercase tracking-wider backdrop-blur-md ${new Date(event.startDate) > new Date()
+                                        ? 'bg-emerald-500/10 text-emerald-400 border-emerald-500/20'
+                                        : 'bg-gray-500/10 text-gray-400 border-gray-500/20'
+                                        }`}>
+                                        {new Date(event.startDate) > new Date() ? 'Upcoming' : 'Past Event'}
+                                    </span>
+                                    {isRsvped && (
+                                        <span className="px-3 py-1.5 rounded-full border border-emerald-500/50 bg-emerald-500/20 text-emerald-300 text-xs font-semibold uppercase tracking-wider backdrop-blur-md flex items-center gap-1.5 animate-in fade-in zoom-in duration-300">
+                                            <div className="w-1.5 h-1.5 rounded-full bg-emerald-400 shadow-[0_0_10px_rgba(52,211,153,0.8)] animate-pulse"></div>
+                                            Registered
+                                        </span>
+                                    )}
+                                </div>
+
+                                {/* Title */}
+                                <h1 className="text-4xl md:text-5xl lg:text-6xl font-black text-transparent bg-clip-text bg-gradient-to-br from-white via-white to-gray-400 leading-[1.1] tracking-tight drop-shadow-sm selection:bg-indigo-500/30 selection:text-white">
                                     {event.name}
                                 </h1>
 
-                                <div className="flex flex-col md:flex-row items-center gap-4 text-gray-300 justify-center md:justify-start">
-                                    <span className="text-sm">Organized by</span>
-                                    {organizer && (
-                                        <div className="flex items-center gap-2 font-medium text-white bg-white/10 px-4 py-2 rounded-full backdrop-blur-sm border border-white/5 hover:bg-white/20 transition-colors cursor-pointer group">
-                                            {organizer.profilePic ? (
-                                                <img src={organizer.profilePic} alt={organizer.name} className="w-6 h-6 rounded-full object-cover border border-white/20" />
-                                            ) : (
-                                                <div className="w-6 h-6 rounded-full bg-indigo-500 flex items-center justify-center text-[10px] font-bold">
-                                                    {organizer.name.charAt(0)}
-                                                </div>
-                                            )}
-                                            <span className="group-hover:text-indigo-300 transition-colors">{organizer.name}</span>
+                                {/* Key Info Grid */}
+                                <div className="grid grid-cols-2 lg:grid-cols-3 gap-3 md:gap-4 border-t border-white/10 pt-6">
+                                    <div className="p-3 md:p-4 rounded-xl bg-white/5 border border-white/5 hover:bg-white/10 transition-colors backdrop-blur-sm group/item">
+                                        <div className="flex items-center justify-center md:justify-start gap-2 text-indigo-400 mb-1.5">
+                                            <Calendar className="w-4 h-4" />
+                                            <span className="text-[10px] md:text-xs font-bold uppercase tracking-wider text-white/50 group-hover/item:text-white/70 transition-colors">Date</span>
                                         </div>
-                                    )}
+                                        <p className="font-semibold text-base md:text-lg text-white">{new Date(event.startDate).toLocaleDateString(undefined, { month: 'short', day: 'numeric', weekday: 'short' })}</p>
+                                    </div>
+
+                                    <div className="p-3 md:p-4 rounded-xl bg-white/5 border border-white/5 hover:bg-white/10 transition-colors backdrop-blur-sm group/item">
+                                        <div className="flex items-center justify-center md:justify-start gap-2 text-indigo-400 mb-1.5">
+                                            <Clock className="w-4 h-4" />
+                                            <span className="text-[10px] md:text-xs font-bold uppercase tracking-wider text-white/50 group-hover/item:text-white/70 transition-colors">Time</span>
+                                        </div>
+                                        <p className="font-semibold text-base md:text-lg text-white">{new Date(event.startDate).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</p>
+                                    </div>
+
+                                    <div className="col-span-2 lg:col-span-1 p-3 md:p-4 rounded-xl bg-white/5 border border-white/5 hover:bg-white/10 transition-colors backdrop-blur-sm group/item">
+                                        <div className="flex items-center justify-center md:justify-start gap-2 text-indigo-400 mb-1.5">
+                                            <MapPin className="w-4 h-4" />
+                                            <span className="text-[10px] md:text-xs font-bold uppercase tracking-wider text-white/50 group-hover/item:text-white/70 transition-colors">Location</span>
+                                        </div>
+                                        <p className="font-semibold text-base md:text-lg text-white truncate px-2 md:px-0" title={event.location}>{event.location}</p>
+                                    </div>
                                 </div>
+
+                                {/* Social Actions */}
+                                <div className="flex flex-wrap items-center justify-center md:justify-start gap-3 md:gap-4 pt-4">
+                                    <button
+                                        onClick={handleRSVP}
+                                        className={`flex items-center gap-2 px-6 py-3 rounded-xl font-bold transition-all hover:scale-105 active:scale-95 shadow-[0_0_20px_rgba(255,255,255,0.2)] ${isRsvped
+                                            ? 'bg-emerald-500/20 text-emerald-400 border border-emerald-500/50 hover:bg-emerald-500/30'
+                                            : 'bg-white text-black hover:bg-gray-200'
+                                            }`}
+                                    >
+                                        {isRsvped ? (
+                                            <>
+                                                <Check className="w-5 h-5" />
+                                                <span>Registered</span>
+                                            </>
+                                        ) : (
+                                            <>
+                                                <Ticket className="w-5 h-5" />
+                                                <span>RSVP Now</span>
+                                            </>
+                                        )}
+                                    </button>
+                                    <button className="p-3 rounded-xl bg-white/5 border border-white/10 text-white hover:bg-white/10 transition-all hover:scale-110 active:scale-90 tooltip" title="Share Event">
+                                        <Share2 className="w-5 h-5" />
+                                    </button>
+                                    <button className="p-3 rounded-xl bg-white/5 border border-white/10 text-pink-500 hover:bg-pink-500/10 transition-all hover:scale-110 active:scale-90 tooltip" title="Like Event">
+                                        <Heart className="w-5 h-5" />
+                                    </button>
+                                </div>
+
                             </div>
                         </div>
                     </div>
@@ -558,6 +636,51 @@ export default function EventPage() {
                     </div>
                 )
             }
+
+            {/* RSVP Form Popup Modal */}
+            {showFormPopup && (
+                <div className="fixed inset-0 z-[60] flex items-center justify-center p-4">
+                    <div className="absolute inset-0 bg-black/80 backdrop-blur-sm" onClick={() => setShowFormPopup(false)} />
+                    <div className="relative bg-[#18181b] border border-white/10 rounded-2xl p-8 max-w-md w-full shadow-2xl animate-in zoom-in-95 duration-200">
+                        <div className="flex flex-col items-center text-center space-y-4">
+                            <div className="w-12 h-12 rounded-full bg-indigo-500/10 flex items-center justify-center border border-indigo-500/20">
+                                <Ticket className="w-6 h-6 text-indigo-400" />
+                            </div>
+
+                            <h3 className="text-2xl font-bold text-white">Registration Required</h3>
+
+                            <p className="text-gray-300">
+                                This event requires you to fill out an external form before we can confirm your RSVP.
+                            </p>
+
+                            <div className="w-full space-y-3 pt-2">
+                                <a
+                                    href={event?.formLink?.startsWith('http') ? event.formLink : `https://${event?.formLink}`}
+                                    target="_blank"
+                                    rel="noopener noreferrer"
+                                    className="block w-full py-3.5 rounded-xl bg-white text-black font-bold hover:bg-gray-200 transition-colors"
+                                >
+                                    Open Form
+                                </a>
+
+                                <button
+                                    onClick={confirmRSVP}
+                                    className="block w-full py-3.5 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white font-semibold transition-colors border border-indigo-500/50"
+                                >
+                                    I've Filled It, RSVP Me
+                                </button>
+
+                                <button
+                                    onClick={() => setShowFormPopup(false)}
+                                    className="block w-full py-2 text-sm text-gray-500 hover:text-gray-300 transition-colors"
+                                >
+                                    Cancel
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            )}
         </div >
     )
 }
